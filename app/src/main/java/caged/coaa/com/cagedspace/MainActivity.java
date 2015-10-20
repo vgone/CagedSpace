@@ -24,7 +24,7 @@ import java.util.List;
 import java.util.Map;
 
 public class MainActivity extends AppCompatActivity implements MediaPlayer.OnErrorListener, MediaPlayer.OnPreparedListener,MediaController.MediaPlayerControl{
-    private MediaPlayer mediaPlayer1,mediaPlayer;
+    private MediaPlayer mediaPlayer1, mediaPlayer2;
     private MediaController mediaController;
     Button btn1,btn2,btnStream;
     private Handler handler;
@@ -39,19 +39,19 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnErr
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        //mediaPlayer = new MediaPlayer();
-        mediaPlayer = new MediaPlayer();
+        //mediaPlayer2 = new MediaPlayer();
+        mediaPlayer2 = new MediaPlayer();
 
-        mediaPlayer.setOnPreparedListener(MainActivity.this);
-        mediaPlayer.setOnErrorListener(MainActivity.this);
+        mediaPlayer2.setOnPreparedListener(MainActivity.this);
+        mediaPlayer2.setOnErrorListener(MainActivity.this);
         btnStream = (Button)findViewById(R.id.btnStart);
         btnStream.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v) {
-//                if(mediaPlayer!=null)
+//                if(mediaPlayer2!=null)
 //                {
-//                    mediaPlayer.release();
-//                    mediaPlayer =null;
+//                    mediaPlayer2.release();
+//                    mediaPlayer2 =null;
 //                }
 
 
@@ -66,8 +66,8 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnErr
                 mediaController = new MediaController(MainActivity.this);
                 try {
 
-                    mediaPlayer.setDataSource("http://streaming.radionomy.com/SkylyneRadioRock1");
-                    mediaPlayer.prepareAsync();
+                    mediaPlayer2.setDataSource("http://streaming.radionomy.com/SkylyneRadioRock1");
+                    mediaPlayer2.prepareAsync();
 
                 }
                 catch(Exception e){
@@ -86,13 +86,13 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnErr
             @Override
             public void onClick(View v) {
                 try {
-                    if(mediaPlayer!=null) {
-                        mediaPlayer.reset();
-                        mediaPlayer.setDataSource("http://indiespectrum.com:9000");
-                        // mediaPlayer.setOnPreparedListener(MainActivity.this);
-                        mediaPlayer.prepareAsync();
+                    if(mediaPlayer2 !=null) {
+                        mediaPlayer2.reset();
+                        mediaPlayer2.setDataSource("http://indiespectrum.com:9000");
+                        // mediaPlayer2.setOnPreparedListener(MainActivity.this);
+                        mediaPlayer2.prepareAsync();
                     }
-                    // mediaPlayer.start();
+                    // mediaPlayer2.start();
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -104,13 +104,13 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnErr
             @Override
             public void onClick(View v) {
                 try {
-                    if(mediaPlayer!=null) {
-                        mediaPlayer.reset();
-                        mediaPlayer.setDataSource("http://usa8-vn.mixstream.net:8138/");
-                        //  mediaPlayer.setOnPreparedListener(MainActivity.this);
-                        mediaPlayer.prepareAsync();
+                    if(mediaPlayer2 !=null) {
+                        mediaPlayer2.reset();
+                        mediaPlayer2.setDataSource("http://usa8-vn.mixstream.net:8138/");
+                        //  mediaPlayer2.setOnPreparedListener(MainActivity.this);
+                        mediaPlayer2.prepareAsync();
                     }
-                    // mediaPlayer.start();
+                    // mediaPlayer2.start();
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -148,27 +148,27 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnErr
                         try {
                             switch (regionNo.intValue()) {
                                 case 1:
-                                    if(mediaPlayer!=null) {
-                                        mediaPlayer.reset();
-                                        mediaPlayer.setDataSource("http://usa8-vn.mixstream.net:8138/");
-                                        //  mediaPlayer.setOnPreparedListener(MainActivity.this);
-                                        mediaPlayer.prepareAsync();
+                                    if(mediaPlayer2 !=null) {
+                                        mediaPlayer2.reset();
+                                        mediaPlayer2.setDataSource("http://usa8-vn.mixstream.net:8138/");
+                                        //  mediaPlayer2.setOnPreparedListener(MainActivity.this);
+                                        mediaPlayer2.prepareAsync();
                                     }
                                     break;
                                 case 2:
-                                    if(mediaPlayer!=null) {
-                                        mediaPlayer.reset();
-                                        mediaPlayer.setDataSource("http://indiespectrum.com:9000");
-                                        //  mediaPlayer.setOnPreparedListener(MainActivity.this);
-                                        mediaPlayer.prepareAsync();
+                                    if(mediaPlayer2 !=null) {
+                                        mediaPlayer2.reset();
+                                        mediaPlayer2.setDataSource("http://indiespectrum.com:9000");
+                                        //  mediaPlayer2.setOnPreparedListener(MainActivity.this);
+                                        mediaPlayer2.prepareAsync();
                                     }
                                     break;
                                 case 3:
-                                    if(mediaPlayer!=null) {
-                                        mediaPlayer.reset();
-                                        mediaPlayer.setDataSource("http://streaming.radionomy.com/SkylyneRadioRock1");
-                                        //  mediaPlayer.setOnPreparedListener(MainActivity.this);
-                                        mediaPlayer.prepareAsync();
+                                    if(mediaPlayer2 !=null) {
+                                        mediaPlayer2.reset();
+                                        mediaPlayer2.setDataSource("http://streaming.radionomy.com/SkylyneRadioRock1");
+                                        //  mediaPlayer2.setOnPreparedListener(MainActivity.this);
+                                        mediaPlayer2.prepareAsync();
                                     }
                                     break;
 
@@ -275,23 +275,23 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnErr
     }
     @Override
     public void finish() {
-        if (mediaPlayer != null){
-            mediaPlayer.stop();
+        if (mediaPlayer2 != null){
+            mediaPlayer2.stop();
         }
         super.finish();
     }
 
     @Override
     public void start() {
-        if(mediaPlayer!=null)
-            mediaPlayer.start();
+        if(mediaPlayer2 !=null)
+            mediaPlayer2.start();
     }
 
     @Override
     public void pause() {
-        Log.d("demo","trying to Pause");
-        if(mediaPlayer != null&&mediaPlayer.isPlaying())
-            mediaPlayer.pause();
+        Log.d("demo", "trying to Pause");
+        if(mediaPlayer2 != null&& mediaPlayer2.isPlaying())
+            mediaPlayer2.pause();
     }
 
     @Override
@@ -311,7 +311,7 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnErr
 
     @Override
     public boolean isPlaying() {
-        return mediaPlayer.isPlaying();
+        return mediaPlayer2.isPlaying();
     }
 
     @Override
