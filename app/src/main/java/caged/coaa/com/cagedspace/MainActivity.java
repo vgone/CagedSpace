@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+//Comment added
 public class MainActivity extends AppCompatActivity implements MediaPlayer.OnErrorListener, MediaPlayer.OnPreparedListener,MediaController.MediaPlayerControl{
     private MediaPlayer mediaPlayer1,mediaPlayer;
     private MediaController mediaController;
