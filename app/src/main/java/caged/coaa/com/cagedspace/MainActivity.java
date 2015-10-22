@@ -18,105 +18,58 @@ import com.estimote.sdk.Beacon;
 import com.estimote.sdk.BeaconManager;
 import com.estimote.sdk.Region;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 //Comment added
-public class MainActivity extends AppCompatActivity implements MediaPlayer.OnErrorListener, MediaPlayer.OnPreparedListener,MediaController.MediaPlayerControl{
-    private MediaPlayer mediaPlayer1,mediaPlayer;
-    private MediaController mediaController;
-    Button btn1,btn2,btnStream;
+public class MainActivity extends AppCompatActivity implements MediaPlayer.OnErrorListener, MediaPlayer.OnPreparedListener, View.OnClickListener {
+    private Map<Integer, MediaPlayerData> mediaPlayers;
+    private List<String> streams;
+    Button btn1, btn2, btnStream;
     private Handler handler;
     private BeaconManager beaconManager;
     private Region region;
     private Map<String, Integer> PLACES_BY_BEACONS;
     int tempRegion = 0;
     int count = 0;
+    int currentStreamId = 0;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        //mediaPlayer = new MediaPlayer();
-        mediaPlayer = new MediaPlayer();
+        mediaPlayers = new HashMap<>();
+        btn1 = (Button) findViewById(R.id.btn1);
+        btn2 = (Button) findViewById(R.id.btn2);
+        btnStream = (Button) findViewById(R.id.btnStart);
+        streams = Arrays.asList("http://streaming.radionomy.com/SkylyneRadioRock1",
+                "http://indiespectrum.com:9000",
+                "http://usa8-vn.mixstream.net:8138");
 
-        mediaPlayer.setOnPreparedListener(MainActivity.this);
-        mediaPlayer.setOnErrorListener(MainActivity.this);
-        btnStream = (Button)findViewById(R.id.btnStart);
-        btnStream.setOnClickListener(new View.OnClickListener(){
-            @Override
-            public void onClick(View v) {
-//                if(mediaPlayer!=null)
-//                {
-//                    mediaPlayer.release();
-//                    mediaPlayer =null;
-//                }
+        for (int i = 0; i < 3; i++) {
+            MediaPlayerData data = new MediaPlayerData();
+            MediaPlayer mp = new MediaPlayer();
+            mp.setOnPreparedListener(this);
+            mp.setOnErrorListener(this);
+            data.setMediaPlayer(mp);
+            data.setUrl(streams.get(i));
+            mediaPlayers.put(i, data);
+        }
 
+        btnStream.setTag("0");
+        btn1.setTag("1");
+        btn2.setTag("2");
 
-
-//                mediaPlayer1.setOnPreparedListener(MainActivity.this);
-//                mediaPlayer1.setOnErrorListener(MainActivity.this);
-
-
-
-
-
-                mediaController = new MediaController(MainActivity.this);
-                try {
-
-                    mediaPlayer.setDataSource("http://streaming.radionomy.com/SkylyneRadioRock1");
-                    mediaPlayer.prepareAsync();
-
-                }
-                catch(Exception e){
-                    e.printStackTrace();
-                }
-            }
-        });
-
-
-
-
-
-
-        btn1= (Button)findViewById(R.id.btn1);
-        btn1.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                try {
-                    if(mediaPlayer!=null) {
-                        mediaPlayer.reset();
-                        mediaPlayer.setDataSource("http://indiespectrum.com:9000");
-                        // mediaPlayer.setOnPreparedListener(MainActivity.this);
-                        mediaPlayer.prepareAsync();
-                    }
-                    // mediaPlayer.start();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        });
-
-        btn2= (Button)findViewById(R.id.btn2);
-        btn2.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                try {
-                    if(mediaPlayer!=null) {
-                        mediaPlayer.reset();
-                        mediaPlayer.setDataSource("http://usa8-vn.mixstream.net:8138/");
-                        //  mediaPlayer.setOnPreparedListener(MainActivity.this);
-                        mediaPlayer.prepareAsync();
-                    }
-                    // mediaPlayer.start();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        });
+        btnStream.setOnClickListener(this);
+        btn1.setOnClickListener(this);
+        btn2.setOnClickListener(this);
 
         //beacons logic
         Map<String, Integer> placesByBeacons = new HashMap<>();
@@ -126,14 +79,14 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnErr
         PLACES_BY_BEACONS = Collections.unmodifiableMap(placesByBeacons);
 
         beaconManager = new BeaconManager(this);
-        // beaconManager.setForegroundScanPeriod(1000,5000);
-        Log.d("demo","onBeacons started");
+         beaconManager.setForegroundScanPeriod(1000,5000);
+        Log.d("demo", "onBeacons started");
 
         beaconManager.setRangingListener(new BeaconManager.RangingListener() {
-
+//
             @Override
             public void onBeaconsDiscovered(Region region, List<Beacon> list) {
-                Log.d("demo","onBeacons Discovered");
+                Log.d("demo", "onBeacons Discovered");
                 if (!list.isEmpty()) {
                     Beacon nearestBeacon = list.get(0);
 
@@ -149,7 +102,7 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnErr
                         try {
                             switch (regionNo.intValue()) {
                                 case 1:
-                                    if(mediaPlayer!=null) {
+                                    if (mediaPlayer != null) {
                                         mediaPlayer.reset();
                                         mediaPlayer.setDataSource("http://usa8-vn.mixstream.net:8138/");
                                         //  mediaPlayer.setOnPreparedListener(MainActivity.this);
@@ -157,7 +110,7 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnErr
                                     }
                                     break;
                                 case 2:
-                                    if(mediaPlayer!=null) {
+                                    if (mediaPlayer != null) {
                                         mediaPlayer.reset();
                                         mediaPlayer.setDataSource("http://indiespectrum.com:9000");
                                         //  mediaPlayer.setOnPreparedListener(MainActivity.this);
@@ -165,7 +118,7 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnErr
                                     }
                                     break;
                                 case 3:
-                                    if(mediaPlayer!=null) {
+                                    if (mediaPlayer != null) {
                                         mediaPlayer.reset();
                                         mediaPlayer.setDataSource("http://streaming.radionomy.com/SkylyneRadioRock1");
                                         //  mediaPlayer.setOnPreparedListener(MainActivity.this);
@@ -175,12 +128,11 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnErr
 
 
                             }
-                        }
-                        catch (Exception e){
+                        } catch (Exception e) {
                             e.printStackTrace();
                         }
 
-                        count =0;
+                        count = 0;
                     }
 
 
@@ -199,12 +151,13 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnErr
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
     }
+
     @Override
     protected void onResume() {
 
         super.onResume();
 
-       beaconManager.connect(new BeaconManager.ServiceReadyCallback() {
+        beaconManager.connect(new BeaconManager.ServiceReadyCallback() {
             @Override
             public void onServiceReady() {
                 try {
@@ -244,107 +197,25 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnErr
 
     @Override
     public void onPrepared(MediaPlayer mp) {
-        Log.d("demo", "onPrepared");
 
-
-
-        mp.start();
-
-        Log.d("demo", "onPrepared1");
-        mediaController.setMediaPlayer(this);
-        mediaController.setAnchorView(findViewById(R.id.audiolayout));
-
-//        handler = new Handler();
-//        handler.post(new Runnable() {
-//            public void run() {
-//
-//            }
-//        });
-        mediaController.setEnabled(true);
-        mediaController.show();
-        Log.d("demo", "onPrepared2");
-
-
-
-    }
-    @Override
-    public boolean onTouchEvent(MotionEvent event) {
-        if(mediaController!=null)
-            mediaController.show();
-
-        return true;
-    }
-    @Override
-    public void finish() {
-        if (mediaPlayer != null){
-            mediaPlayer.stop();
+        for (int key : mediaPlayers.keySet()) {
+            if (key == currentStreamId) {
+                MediaPlayerData mediaPlayerData = mediaPlayers.get(key);
+                mediaPlayerData.getMediaPlayer().start();
+            } else {
+                MediaPlayerData mediaPlayerData = mediaPlayers.get(key);
+                mediaPlayerData.getMediaPlayer().reset();
+            }
         }
-        super.finish();
     }
 
-    @Override
-    public void start() {
-        if(mediaPlayer!=null)
-            mediaPlayer.start();
-    }
-
-    @Override
-    public void pause() {
-        Log.d("demo","trying to Pause");
-        if(mediaPlayer != null&&mediaPlayer.isPlaying())
-            mediaPlayer.pause();
-    }
-
-    @Override
-    public int getDuration() {
-        return 0;
-    }
-
-    @Override
-    public int getCurrentPosition() {
-        return 0;
-    }
-
-    @Override
-    public void seekTo(int pos) {
-
-    }
-
-    @Override
-    public boolean isPlaying() {
-        return mediaPlayer.isPlaying();
-    }
-
-    @Override
-    public int getBufferPercentage() {
-        return 0;
-    }
-
-    @Override
-    public boolean canPause() {
-        return true;
-    }
-
-    @Override
-    public boolean canSeekBackward() {
-        return false;
-    }
-
-    @Override
-    public boolean canSeekForward() {
-        return false;
-    }
-
-    @Override
-    public int getAudioSessionId() {
-        return 0;
-    }
 
     @Override
     public boolean onError(MediaPlayer mp, int what, int extra) {
-        Log.d("Demo","what is "+what+" extra is "+extra);
+        Log.d("Demo", "what is " + what + " extra is " + extra);
         return true;
     }
+
     private Integer placesNearBeacon(Beacon beacon) {
         String beaconKey = String.format("%d:%d", beacon.getMajor(), beacon.getMinor());
         Log.d("debug", "key of beacon is" + beaconKey);
@@ -353,5 +224,18 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnErr
             return PLACES_BY_BEACONS.get(beaconKey);
         }
         return 0;
+    }
+
+    @Override
+    public void onClick(View v) {
+        int id = Integer.parseInt((String) v.getTag());
+        currentStreamId = id;
+        MediaPlayerData mediaPlayerData = mediaPlayers.get(id);
+        try {
+            mediaPlayerData.getMediaPlayer().setDataSource(mediaPlayerData.getUrl());
+            mediaPlayerData.getMediaPlayer().prepareAsync();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
