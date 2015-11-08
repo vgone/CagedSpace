@@ -26,4 +26,5 @@ dependencies {
     compile 'com.android.support:design:23.0.1'
     compile 'com.estimote:sdk:0.8.8@aar'
     compile fileTree(dir: 'libs', include: 'Parse-*.jar')
+    compile 'com.parse.bolts:bolts-android:1.+'
 }

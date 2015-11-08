@@ -3,6 +3,7 @@ package caged.coaa.com.cagedspace;
 import android.app.Application;
 
 import com.estimote.sdk.BeaconManager;
+import com.parse.Parse;
 
 
 /**
@@ -15,7 +16,8 @@ public class App extends Application {
     public void onCreate() {
         super.onCreate();
         beaconManager = new BeaconManager(getApplicationContext());
-//        Parse.initialize(this, "mBn5ZTL38GuillbOaSN8EXlTnBlqopMWEQYESnI9", "RQ7N7QCOLiKIrio82wknTMmIZjnKx7HXiTEjSd1e");
+       Parse.initialize(this, "T0zNIvsroRy6LRyCO3mT90txR5ADqz6nprz2rcs1", "EuNsGGr1rFccqfUeKOH7yX5lIsudzuSreL9PVmAb");
+        Parse.enableLocalDatastore(this);
     }
 
 }
