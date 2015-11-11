@@ -16,6 +16,7 @@ import com.estimote.sdk.BeaconManager;
 import com.estimote.sdk.Region;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -43,12 +44,10 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnErr
         setSupportActionBar(toolbar);
         mediaPlayers = new HashMap<>();
 
-//
-//        streams = Arrays.asList("http://50.22.212.195:8078/stream?icy=http",
-//                "http://indiespectrum.com:9000",
-//                "http://142.4.217.133:8488/stream?icy=http");
 
-
+        streams = Arrays.asList("http://50.22.212.195:8078/stream?icy=http",
+                "http://indiespectrum.com:9000",
+                "http://142.4.217.133:8488/stream?icy=http");
 
 
         for (int i = 0; i < 3; i++) {
