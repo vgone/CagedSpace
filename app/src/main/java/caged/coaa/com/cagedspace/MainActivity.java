@@ -45,8 +45,8 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnErr
         mediaPlayers = new HashMap<>();
 
 
-        streams = Arrays.asList("http://50.22.212.195:8078/stream?icy=http",
-                "http://indiespectrum.com:9000",
+        streams = Arrays.asList("rtsp://wnyc-3gp.streamguys.com/wnycam/wnycam.sdp",
+                "http://192.168.173.1:8000/stream",
                 "http://142.4.217.133:8488/stream?icy=http");
 
 
