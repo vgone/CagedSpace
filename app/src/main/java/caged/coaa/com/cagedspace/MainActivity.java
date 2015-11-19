@@ -16,11 +16,14 @@ import com.estimote.sdk.BeaconManager;
 import com.estimote.sdk.Region;
 
 import java.io.IOException;
+import java.sql.Time;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 
 //Comment added
 public class MainActivity extends AppCompatActivity implements MediaPlayer.OnErrorListener, MediaPlayer.OnPreparedListener {
@@ -31,6 +34,8 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnErr
     private BeaconManager beaconManager;
     private Region region;
     private Map<String, Integer> PLACES_BY_BEACONS;
+    float volume1,volume2;
+    Timer timer1;
     //int tempRegion = 0;
     //int count = 0;
     int currentStreamId = 0;
@@ -96,15 +101,23 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnErr
                                 currentStreamId = regionNo.intValue();
                                 tvStreamNo.setText("" + (currentStreamId));
                                 MediaPlayerData mediaPlayerData = mediaPlayers.get(currentStreamId);
-                                try {
-                                    if (!mediaPlayerData.getMediaPlayer().isPlaying()) {
-                                        mediaPlayerData.getMediaPlayer().setDataSource(mediaPlayerData.getUrl());
-                                        mediaPlayerData.getMediaPlayer().prepareAsync();
+                                MediaPlayer newPlayer = mediaPlayerData.getMediaPlayer();
+                                for(int key: mediaPlayers.keySet()){
+                                    MediaPlayerData mpd = mediaPlayers.get(key);
+                                    MediaPlayer mp = mpd.getMediaPlayer();
+                                    if(mp.isPlaying()){
+                                        if(mp!=newPlayer){
+                                            fadeOut(mp);
+                                        }
+                                    } else if(mp == newPlayer){
+                                        try {
+                                            newPlayer.setDataSource(mediaPlayerData.getUrl());
+                                            newPlayer.prepareAsync();
+                                        } catch (IOException e) {
+                                            e.printStackTrace();
+                                        }
                                     }
-                                } catch (IOException e) {
-                                    e.printStackTrace();
                                 }
-
                                 beaconCounter.clear();
                             } else {
                                 beaconCounter.put(regionNo, count + 1);
@@ -125,7 +138,6 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnErr
                 "B9407F30-F5F8-466E-AFF9-25556B57FE6D", null, null);
 
     }
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -179,17 +191,43 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnErr
     }
 
     @Override
-    public void onPrepared(MediaPlayer mp) {
+    public void onPrepared(final MediaPlayer mp) {
+                volume1 = 0;
+                mp.setVolume(volume1,volume1);
+                mp.start();
+                timer1 = new Timer();
+                timer1.scheduleAtFixedRate(new TimerTask() {
+                    @Override
+                    public void run() {
+                        if (volume1 < 1.1) {
+                            mp.setVolume(volume1, volume1);
+                            Log.d("demo","Volume1 is "+volume1);
+                            volume1 += 0.1;
+                        } else {
+                            timer1.cancel();
+                            timer1.purge();
+                        }
+                    }
+                }, 0, 1100);
+    }
 
-        for (int key : mediaPlayers.keySet()) {
-            if (key == currentStreamId) {
-                MediaPlayerData mediaPlayerData = mediaPlayers.get(key);
-                mediaPlayerData.getMediaPlayer().start();
-            } else {
-                MediaPlayerData mediaPlayerData = mediaPlayers.get(key);
-                mediaPlayerData.getMediaPlayer().reset();
+    private void fadeOut(final MediaPlayer mp) {
+        volume2 = (float) 1.0;
+        final Timer timer2 = new Timer();
+        timer2.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                if (volume2 > 0) {
+                    mp.setVolume(volume2, volume2);
+                    Log.d("demo", "Volume2 is " + volume2);
+                    volume2 -= 0.1;
+                } else {
+                    timer2.cancel();
+                    timer2.purge();
+                    mp.reset();
+                }
             }
-        }
+        }, 0, 1000);
     }
 
 
