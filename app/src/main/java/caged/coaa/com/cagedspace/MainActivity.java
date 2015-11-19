@@ -43,7 +43,19 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnErr
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        beaconManager = new BeaconManager(this);
+        beaconManager.connect(new BeaconManager.ServiceReadyCallback() {
+            @Override
+            public void onServiceReady() {
+                Log.d("demo", "on resume beacon");
+                try {
+                    beaconManager.startRanging(region);
+                } catch (RemoteException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         mediaPlayers = new HashMap<>();
@@ -73,7 +85,6 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnErr
         placesByBeacons.put("34567:20852", 2);
         PLACES_BY_BEACONS = Collections.unmodifiableMap(placesByBeacons);
 
-        beaconManager = new BeaconManager(this);
         beaconCounter = new HashMap<>();
 
         // beaconManager.setForegroundScanPeriod(1000,5000);
@@ -144,36 +155,17 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnErr
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
     }
-
+/*
     @Override
-    protected void onResume() {
-
-        super.onResume();
-
-        beaconManager.connect(new BeaconManager.ServiceReadyCallback() {
-            @Override
-            public void onServiceReady() {
-                Log.d("demo", "on resume beacon");
-                try {
-                    beaconManager.startRanging(region);
-                } catch (RemoteException e) {
-                    e.printStackTrace();
-                }
-            }
-        });
-    }
-
-
-    @Override
-    protected void onPause() {
+    protected void onDestroy() {
         try {
             beaconManager.stopRanging(region);
         } catch (RemoteException e) {
             e.printStackTrace();
         }
-        super.onPause();
+        super.onDestroy();
     }
-
+*/
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
