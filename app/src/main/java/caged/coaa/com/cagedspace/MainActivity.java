@@ -16,7 +16,6 @@ import com.estimote.sdk.BeaconManager;
 import com.estimote.sdk.Region;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -61,9 +60,13 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnErr
         mediaPlayers = new HashMap<>();
 
 
-        streams = Arrays.asList("rtsp://wnyc-3gp.streamguys.com/wnycam/wnycam.sdp",
-                "http://192.168.173.1:8000/stream",
-                "http://142.4.217.133:8488/stream?icy=http");
+        for (int i = 0; i < 24; i++) {
+            if(i % 2 == 0) {
+                streams.add("rtsp://wnyc-3gp.streamguys.com/wnycam/wnycam.sdp");
+            } else {
+                streams.add("http://142.4.217.133:8488/stream?icy=http");
+            }
+        }
 
 
         for (int i = 0; i < 3; i++) {
@@ -228,14 +231,11 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnErr
         return true;
     }
 
+    int counter = 0;
     private Integer placesNearBeacon(Beacon beacon) {
-        String beaconKey = String.format("%d:%d", beacon.getMajor(), beacon.getMinor());
-        // Log.d("demo", "key of beacon is" + beaconKey);
-        if (PLACES_BY_BEACONS.containsKey(beaconKey)) {
-            Log.d("demo", "key of beacon is" + beaconKey);
-            return PLACES_BY_BEACONS.get(beaconKey);
-        }
-        return 0;
+        counter++;
+        counter = counter % 24;
+        return counter;
     }
 
 }
