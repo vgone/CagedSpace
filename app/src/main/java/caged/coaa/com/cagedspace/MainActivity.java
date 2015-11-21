@@ -69,7 +69,7 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnErr
         }
 
 
-        for (int i = 0; i < 3; i++) {
+        for (int i = 0; i < 24; i++) {
             MediaPlayerData data = new MediaPlayerData();
             MediaPlayer mp = new MediaPlayer();
             mp.setOnPreparedListener(this);
@@ -111,7 +111,9 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnErr
                             int count = beaconCounter.get(regionNo);
                             if (count == 10) {
                                 // int id = Integer.parseInt((String) v.getTag());
-                                currentStreamId = regionNo.intValue();
+//                                currentStreamId = regionNo.intValue();
+                                currentStreamId++;
+                                currentStreamId = currentStreamId % 24;
                                 tvStreamNo.setText("" + (currentStreamId));
                                 MediaPlayerData mediaPlayerData = mediaPlayers.get(currentStreamId);
                                 MediaPlayer newPlayer = mediaPlayerData.getMediaPlayer();
@@ -231,11 +233,14 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnErr
         return true;
     }
 
-    int counter = 0;
     private Integer placesNearBeacon(Beacon beacon) {
-        counter++;
-        counter = counter % 24;
-        return counter;
+        String beaconKey = String.format("%d:%d", beacon.getMajor(), beacon.getMinor());
+        // Log.d("demo", "key of beacon is" + beaconKey);
+        if (PLACES_BY_BEACONS.containsKey(beaconKey)) {
+            Log.d("demo", "key of beacon is" + beaconKey);
+            return PLACES_BY_BEACONS.get(beaconKey);
+        }
+        return 0;
     }
 
 }
