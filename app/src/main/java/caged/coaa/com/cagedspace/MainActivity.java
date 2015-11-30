@@ -16,6 +16,7 @@ import com.estimote.sdk.BeaconManager;
 import com.estimote.sdk.Region;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -59,12 +60,12 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnErr
         setSupportActionBar(toolbar);
         mediaPlayers = new HashMap<>();
 
-
+        streams = new ArrayList<>();
         for (int i = 0; i < 24; i++) {
             if(i % 2 == 0) {
-                streams.add("rtsp://wnyc-3gp.streamguys.com/wnycam/wnycam.sdp");
+                streams.add("http://www.tonycuffe.com/mp3/tail%20toddle.mp3");
             } else {
-                streams.add("http://142.4.217.133:8488/stream?icy=http");
+                streams.add("http://www.tonycuffe.com/mp3/cairnomount.mp3");
             }
         }
 
@@ -109,12 +110,13 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnErr
                         }
                         if (beaconCounter.containsKey(regionNo)) {
                             int count = beaconCounter.get(regionNo);
-                            if (count == 10) {
+                            if (count == 4) {
                                 // int id = Integer.parseInt((String) v.getTag());
 //                                currentStreamId = regionNo.intValue();
                                 currentStreamId++;
                                 currentStreamId = currentStreamId % 24;
                                 tvStreamNo.setText("" + (currentStreamId));
+
                                 MediaPlayerData mediaPlayerData = mediaPlayers.get(currentStreamId);
                                 MediaPlayer newPlayer = mediaPlayerData.getMediaPlayer();
                                 for(int key: mediaPlayers.keySet()){
@@ -204,7 +206,7 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnErr
                             timer1.purge();
                         }
                     }
-                }, 0, 1100);
+                }, 0, 200);
     }
 
     private void fadeOut(final MediaPlayer mp) {
@@ -223,7 +225,7 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnErr
                     mp.reset();
                 }
             }
-        }, 0, 1000);
+        }, 0, 200);
     }
 
 
