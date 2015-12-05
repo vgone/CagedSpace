@@ -16,13 +16,15 @@ import com.estimote.sdk.BeaconManager;
 import com.estimote.sdk.Region;
 
 import java.io.IOException;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Timer;
-import java.util.TimerTask;
+
+import caged.coaa.com.cagedspace.Interface.GridCallBack;
+import caged.coaa.com.cagedspace.Tasks.GridTask;
 
 //Comment added
 public class MainActivity extends AppCompatActivity implements MediaPlayer.OnErrorListener, MediaPlayer.OnPreparedListener {
@@ -32,7 +34,7 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnErr
     private BeaconManager beaconManager;
     private Region region;
     private Map<String, Integer> PLACES_BY_BEACONS;
-    float volume1,volume2;
+    float volume1, volume2;
     Timer timer1;
     //int tempRegion = 0;
     //int count = 0;
@@ -45,6 +47,8 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnErr
         setContentView(R.layout.activity_main);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         beaconManager = new BeaconManager(this);
+        region = new Region("Global region",
+                "B9407F30-F5F8-466E-AFF9-25556B57FE6D", null, null);
         beaconManager.connect(new BeaconManager.ServiceReadyCallback() {
             @Override
             public void onServiceReady() {
@@ -59,94 +63,11 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnErr
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         mediaPlayers = new HashMap<>();
+        new GridTask(MainActivity.this, gridCallBack).execute("http://192.168.137.1:8081/CagedSpaceWS/rest/grids");
 
-
-        streams = Arrays.asList("rtsp://wnyc-3gp.streamguys.com/wnycam/wnycam.sdp",
-                "http://192.168.173.1:8000/stream",
-                "http://142.4.217.133:8488/stream?icy=http");
-
-
-        for (int i = 0; i < 3; i++) {
-            MediaPlayerData data = new MediaPlayerData();
-            MediaPlayer mp = new MediaPlayer();
-            mp.setOnPreparedListener(this);
-            mp.setOnErrorListener(this);
-            data.setMediaPlayer(mp);
-            data.setUrl(streams.get(i));
-            mediaPlayers.put(i, data);
-        }
         tvStreamNo = (TextView) findViewById(R.id.tvStreamNumber);
         Log.d("demo", "text is " + tvStreamNo.getText());
         tvStreamNo.setText("#");
-        //beacons logic
-        Map<String, Integer> placesByBeacons = new HashMap<>();
-        placesByBeacons.put("20256:28960", 0);
-        placesByBeacons.put("35131:24072", 1);
-        placesByBeacons.put("34567:20852", 2);
-        PLACES_BY_BEACONS = Collections.unmodifiableMap(placesByBeacons);
-
-        beaconCounter = new HashMap<>();
-
-        // beaconManager.setForegroundScanPeriod(1000,5000);
-        Log.d("demo", "onBeacons started");
-
-        beaconManager.setRangingListener(new BeaconManager.RangingListener() {
-            //
-            @Override
-            public void onBeaconsDiscovered(Region region, List<Beacon> list) {
-                // Log.d("demo", "onBeacons Discovered");
-                if (!list.isEmpty()) {
-                    Beacon nearestBeacon = list.get(0);
-
-                    Integer regionNo = placesNearBeacon(nearestBeacon);
-                    if (!beaconCounter.isEmpty()) {
-                        //Set<Integer> regionSets = beaconCounter.keySet();
-                        for (int i : beaconCounter.keySet()) {
-                            Log.d("demo", "Key is " + i + " value is " + beaconCounter.get(i));
-                        }
-                        if (beaconCounter.containsKey(regionNo)) {
-                            int count = beaconCounter.get(regionNo);
-                            if (count == 10) {
-                                // int id = Integer.parseInt((String) v.getTag());
-                                currentStreamId = regionNo.intValue();
-                                tvStreamNo.setText("" + (currentStreamId));
-                                MediaPlayerData mediaPlayerData = mediaPlayers.get(currentStreamId);
-                                MediaPlayer newPlayer = mediaPlayerData.getMediaPlayer();
-                                for(int key: mediaPlayers.keySet()){
-                                    MediaPlayerData mpd = mediaPlayers.get(key);
-                                    MediaPlayer mp = mpd.getMediaPlayer();
-                                    if(mp.isPlaying()){
-                                        if(mp!=newPlayer){
-                                            fadeOut(mp);
-                                        }
-                                    } else if(mp == newPlayer){
-                                        try {
-                                            newPlayer.setDataSource(mediaPlayerData.getUrl());
-                                            newPlayer.prepareAsync();
-                                        } catch (IOException e) {
-                                            e.printStackTrace();
-                                        }
-                                    }
-                                }
-                                beaconCounter.clear();
-                            } else {
-                                beaconCounter.put(regionNo, count + 1);
-                            }
-                        } else {
-                            beaconCounter.put(regionNo, 1);//registering first count of beacon as 1
-                        }
-
-                    } else {
-                        beaconCounter.put(regionNo, 1);
-                    }
-
-
-                }
-            }
-        });
-        region = new Region("Global region",
-                "B9407F30-F5F8-466E-AFF9-25556B57FE6D", null, null);
-
     }
 
     @Override
@@ -155,17 +76,18 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnErr
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
     }
-/*
-    @Override
-    protected void onDestroy() {
-        try {
-            beaconManager.stopRanging(region);
-        } catch (RemoteException e) {
-            e.printStackTrace();
+
+    /*
+        @Override
+        protected void onDestroy() {
+            try {
+                beaconManager.stopRanging(region);
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
+            super.onDestroy();
         }
-        super.onDestroy();
-    }
-*/
+    */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
@@ -183,42 +105,15 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnErr
 
     @Override
     public void onPrepared(final MediaPlayer mp) {
-                volume1 = 0;
-                mp.setVolume(volume1,volume1);
-                mp.start();
-                timer1 = new Timer();
-                timer1.scheduleAtFixedRate(new TimerTask() {
-                    @Override
-                    public void run() {
-                        if (volume1 < 1.1) {
-                            mp.setVolume(volume1, volume1);
-                            Log.d("demo","Volume1 is "+volume1);
-                            volume1 += 0.1;
-                        } else {
-                            timer1.cancel();
-                            timer1.purge();
-                        }
-                    }
-                }, 0, 1100);
-    }
-
-    private void fadeOut(final MediaPlayer mp) {
-        volume2 = (float) 1.0;
-        final Timer timer2 = new Timer();
-        timer2.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                if (volume2 > 0) {
-                    mp.setVolume(volume2, volume2);
-                    Log.d("demo", "Volume2 is " + volume2);
-                    volume2 -= 0.1;
-                } else {
-                    timer2.cancel();
-                    timer2.purge();
-                    mp.reset();
-                }
+        for (int key : mediaPlayers.keySet()) {
+            if (key == currentStreamId) {
+                MediaPlayerData mediaPlayerData = mediaPlayers.get(key);
+                mediaPlayerData.getMediaPlayer().start();
+            } else {
+                MediaPlayerData mediaPlayerData = mediaPlayers.get(key);
+                mediaPlayerData.getMediaPlayer().reset();
             }
-        }, 0, 1000);
+        }
     }
 
 
@@ -238,4 +133,86 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnErr
         return 0;
     }
 
+    GridCallBack gridCallBack = new GridCallBack() {
+        @Override
+        public void getGridList(ArrayList<Grid> alGrids) {
+            Log.d("debug", alGrids.toString());
+            Map<String, Integer> placesByBeacons = new HashMap<>();
+            for (Grid tempGrid : alGrids) {
+                MediaPlayerData data = new MediaPlayerData();
+                MediaPlayer mp = new MediaPlayer();
+                mp.setOnPreparedListener(MainActivity.this);
+                mp.setOnErrorListener(MainActivity.this);
+                data.setMediaPlayer(mp);
+                data.setUrl(tempGrid.getStreamURL());
+                mediaPlayers.put((int) tempGrid.getId(), data);
+
+                placesByBeacons.put(tempGrid.getBeaconId(), tempGrid.getId());
+
+            }
+            for (int i : mediaPlayers.keySet()) {
+                Log.d("demo", "Key of mediaplayer " + i + " value is " + mediaPlayers.get(i));
+            }
+            PLACES_BY_BEACONS = Collections.unmodifiableMap(placesByBeacons);
+            kickStartRanging();
+        }
+    };
+
+    public void kickStartRanging() {
+        beaconCounter = new HashMap<>();
+
+        // beaconManager.setForegroundScanPeriod(1000,5000);
+        Log.d("demo", "onBeacons started");
+
+        beaconManager.setRangingListener(new BeaconManager.RangingListener() {
+            //
+            @Override
+            public void onBeaconsDiscovered(Region region, List<Beacon> list) {
+                // Log.d("demo", "onBeacons Discovered");
+                if (!list.isEmpty()) {
+                    Beacon nearestBeacon = list.get(0);
+
+                    Integer regionNo = placesNearBeacon(nearestBeacon);
+                    if (regionNo != 0) {
+
+
+                        if (!beaconCounter.isEmpty()) {
+                            //Set<Integer> regionSets = beaconCounter.keySet();
+                            for (int i : beaconCounter.keySet()) {
+                                Log.d("demo", "Key is " + i + " value is " + beaconCounter.get(i));
+                            }
+                            if (beaconCounter.containsKey(regionNo)) {
+                                int count = beaconCounter.get(regionNo);
+                                if (count == 10) {
+                                   Log.d("demo","playing the stream "+regionNo);
+                                    currentStreamId = regionNo.intValue();
+                                    tvStreamNo.setText("" + (currentStreamId));
+                                    MediaPlayerData mediaPlayerData = mediaPlayers.get(currentStreamId);
+                                    try {
+                                       // if (!mediaPlayerData.getMediaPlayer().isPlaying()) {
+                                            mediaPlayerData.getMediaPlayer().setDataSource(mediaPlayerData.getUrl());
+                                            mediaPlayerData.getMediaPlayer().prepareAsync();
+                                        //}
+                                    } catch (IllegalStateException | IOException e) {
+                                        Log.d("TAG", "Soemthing stupid happened");
+                                    }
+                                    beaconCounter.clear();
+                                } else {
+                                    beaconCounter.put(regionNo, count + 1);
+                                }
+                            } else {
+                                beaconCounter.put(regionNo, 1);//registering first count of beacon as 1
+                            }
+
+                        } else {
+                            beaconCounter.put(regionNo, 1);
+                        }
+                    }
+
+
+                }
+            }
+        });
+
+    }
 }
