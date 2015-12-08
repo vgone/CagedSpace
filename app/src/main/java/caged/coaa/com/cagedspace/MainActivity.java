@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Timer;
+import java.util.TimerTask;
 
 import caged.coaa.com.cagedspace.Interface.GridCallBack;
 import caged.coaa.com.cagedspace.Tasks.GridTask;
@@ -39,6 +40,7 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnErr
     //int tempRegion = 0;
     //int count = 0;
     int currentStreamId = 0;
+    MediaPlayer fadeOutMp = null;
     private Map<Integer, Integer> beaconCounter;
 
     @Override
@@ -63,7 +65,7 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnErr
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         mediaPlayers = new HashMap<>();
-        new GridTask(MainActivity.this, gridCallBack).execute("http://192.168.137.1:8081/CagedSpaceWS/rest/grids");
+        new GridTask(MainActivity.this, gridCallBack).execute("http://10.38.24.96:8081/CagedSpaceWS/rest/grids");
 
         tvStreamNo = (TextView) findViewById(R.id.tvStreamNumber);
         Log.d("demo", "text is " + tvStreamNo.getText());
@@ -105,17 +107,47 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnErr
 
     @Override
     public void onPrepared(final MediaPlayer mp) {
-        for (int key : mediaPlayers.keySet()) {
-            if (key == currentStreamId) {
-                MediaPlayerData mediaPlayerData = mediaPlayers.get(key);
-                mediaPlayerData.getMediaPlayer().start();
-            } else {
-                MediaPlayerData mediaPlayerData = mediaPlayers.get(key);
-                mediaPlayerData.getMediaPlayer().reset();
+        volume1 = 0;
+        mp.setVolume(volume1,volume1);
+        mp.start();
+        timer1 = new Timer();
+        timer1.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                if (volume1 < 1.1) {
+                    mp.setVolume(volume1, volume1);
+                    if(fadeOutMp != null)
+                        fadeOutMp.setVolume((float)1-volume1, (float)1-volume1);
+                    Log.d("demo","Volume1 is "+volume1);
+                    volume1 += 0.1;
+                } else {
+                    if(fadeOutMp != null)
+                        fadeOutMp.reset();
+                    timer1.cancel();
+                    timer1.purge();
+                }
             }
-        }
+        }, 0, 400);
     }
 
+    private void fadeOut(final MediaPlayer mp) {
+        volume2 = (float) 1.0;
+        final Timer timer2 = new Timer();
+        timer2.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                if (volume2 > 0) {
+                    mp.setVolume(volume2, volume2);
+                    Log.d("demo", "Volume2 is " + volume2);
+                    volume2 -= 0.1;
+                } else {
+                    timer2.cancel();
+                    timer2.purge();
+                    mp.reset();
+                }
+            }
+        }, 0, 1200);
+    }
 
     @Override
     public boolean onError(MediaPlayer mp, int what, int extra) {
@@ -183,18 +215,30 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnErr
                             }
                             if (beaconCounter.containsKey(regionNo)) {
                                 int count = beaconCounter.get(regionNo);
-                                if (count == 10) {
-                                   Log.d("demo","playing the stream "+regionNo);
+                                if (count == 3) {
+                                    Log.d("demo", "playing the stream " + regionNo);
                                     currentStreamId = regionNo.intValue();
                                     tvStreamNo.setText("" + (currentStreamId));
                                     MediaPlayerData mediaPlayerData = mediaPlayers.get(currentStreamId);
-                                    try {
-                                       // if (!mediaPlayerData.getMediaPlayer().isPlaying()) {
-                                            mediaPlayerData.getMediaPlayer().setDataSource(mediaPlayerData.getUrl());
-                                            mediaPlayerData.getMediaPlayer().prepareAsync();
-                                        //}
-                                    } catch (IllegalStateException | IOException e) {
-                                        Log.d("TAG", "Soemthing stupid happened");
+                                    MediaPlayer newPlayer = mediaPlayerData.getMediaPlayer();
+                                    for (int key : mediaPlayers.keySet()) {
+                                        MediaPlayerData mpd = mediaPlayers.get(key);
+                                        MediaPlayer mp = mpd.getMediaPlayer();
+                                        if (mp.isPlaying()) {
+                                            if (mp != newPlayer) {
+                                                //fadeOut(mp);
+                                                fadeOutMp = mp;
+                                            }
+                                        } else if (mp == newPlayer) {
+                                            try {
+                                                newPlayer.setDataSource(mediaPlayerData.getUrl());
+                                                newPlayer.prepareAsync();
+                                            } catch (IOException | IllegalStateException e) {
+                                                Log.d("TAG", "Error occurred");
+                                            }
+                                        }
+                                        else
+                                            Log.d("demo","playing same track" );
                                     }
                                     beaconCounter.clear();
                                 } else {
@@ -215,4 +259,5 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnErr
         });
 
     }
+
 }
