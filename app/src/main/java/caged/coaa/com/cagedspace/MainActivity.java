@@ -1,6 +1,7 @@
 package caged.coaa.com.cagedspace;
 
 import android.content.pm.ActivityInfo;
+import android.hardware.SensorManager;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.RemoteException;
@@ -26,9 +27,10 @@ import java.util.TimerTask;
 
 import caged.coaa.com.cagedspace.Interface.GridCallBack;
 import caged.coaa.com.cagedspace.Tasks.GridTask;
+import caged.coaa.com.cagedspace.Tasks.UserPositionDetector;
 
 //Comment added
-public class MainActivity extends AppCompatActivity implements MediaPlayer.OnErrorListener, MediaPlayer.OnPreparedListener {
+public class MainActivity extends AppCompatActivity implements MediaPlayer.OnErrorListener, MediaPlayer.OnPreparedListener,UserPositionDetector.MovementListener {
     private Map<Integer, MediaPlayerData> mediaPlayers;
     private List<String> streams;
     TextView tvStreamNo;
@@ -42,6 +44,8 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnErr
     int currentStreamId = 0;
     MediaPlayer fadeOutMp = null;
     private Map<Integer, Integer> beaconCounter;
+    int movementCount=0,previousCount=0;
+    UserPositionDetector userPositionDetector;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,10 +66,13 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnErr
                 }
             }
         });
+        SensorManager sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
+        userPositionDetector = new UserPositionDetector(sensorManager,this);
+        userPositionDetector.startDetector();
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         mediaPlayers = new HashMap<>();
-        new GridTask(MainActivity.this, gridCallBack).execute("http://10.38.24.96:8081/CagedSpaceWS/rest/grids");
+        //new GridTask(MainActivity.this, gridCallBack).execute("http://10.38.24.96:8081/CagedSpaceWS/rest/grids");
 
         tvStreamNo = (TextView) findViewById(R.id.tvStreamNumber);
         Log.d("demo", "text is " + tvStreamNo.getText());
@@ -79,17 +86,17 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnErr
         return true;
     }
 
-    /*
+
         @Override
         protected void onDestroy() {
-            try {
+            userPositionDetector.stopDetector();
+            /*try {
                 beaconManager.stopRanging(region);
             } catch (RemoteException e) {
                 e.printStackTrace();
-            }
+            }*/
             super.onDestroy();
         }
-    */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
@@ -116,12 +123,12 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnErr
             public void run() {
                 if (volume1 < 1.1) {
                     mp.setVolume(volume1, volume1);
-                    if(fadeOutMp != null)
-                        fadeOutMp.setVolume((float)1-volume1, (float)1-volume1);
-                    Log.d("demo","Volume1 is "+volume1);
+                    if (fadeOutMp != null)
+                        fadeOutMp.setVolume((float) 1 - volume1, (float) 1 - volume1);
+                    Log.d("demo", "Volume1 is " + volume1);
                     volume1 += 0.1;
                 } else {
-                    if(fadeOutMp != null)
+                    if (fadeOutMp != null)
                         fadeOutMp.reset();
                     timer1.cancel();
                     timer1.purge();
@@ -130,7 +137,7 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnErr
         }, 0, 400);
     }
 
-    private void fadeOut(final MediaPlayer mp) {
+   /* private void fadeOut(final MediaPlayer mp) {
         volume2 = (float) 1.0;
         final Timer timer2 = new Timer();
         timer2.schedule(new TimerTask() {
@@ -148,7 +155,7 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnErr
             }
         }, 0, 1200);
     }
-
+*/
     @Override
     public boolean onError(MediaPlayer mp, int what, int extra) {
         Log.d("Demo", "what is " + what + " extra is " + extra);
@@ -216,29 +223,32 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnErr
                             if (beaconCounter.containsKey(regionNo)) {
                                 int count = beaconCounter.get(regionNo);
                                 if (count == 3) {
-                                    Log.d("demo", "playing the stream " + regionNo);
-                                    currentStreamId = regionNo.intValue();
-                                    tvStreamNo.setText("" + (currentStreamId));
-                                    MediaPlayerData mediaPlayerData = mediaPlayers.get(currentStreamId);
-                                    MediaPlayer newPlayer = mediaPlayerData.getMediaPlayer();
-                                    for (int key : mediaPlayers.keySet()) {
-                                        MediaPlayerData mpd = mediaPlayers.get(key);
-                                        MediaPlayer mp = mpd.getMediaPlayer();
-                                        if (mp.isPlaying()) {
-                                            if (mp != newPlayer) {
-                                                //fadeOut(mp);
-                                                fadeOutMp = mp;
-                                            }
-                                        } else if (mp == newPlayer) {
-                                            try {
-                                                newPlayer.setDataSource(mediaPlayerData.getUrl());
-                                                newPlayer.prepareAsync();
-                                            } catch (IOException | IllegalStateException e) {
-                                                Log.d("TAG", "Error occurred");
-                                            }
+                                    if(previousCount + 7 <movementCount) {
+
+                                        previousCount = movementCount;
+                                        Log.d("demo", "playing the stream " + regionNo);
+                                        currentStreamId = regionNo.intValue();
+                                        tvStreamNo.setText("" + (currentStreamId));
+                                        MediaPlayerData mediaPlayerData = mediaPlayers.get(currentStreamId);
+                                        MediaPlayer newPlayer = mediaPlayerData.getMediaPlayer();
+                                        for (int key : mediaPlayers.keySet()) {
+                                            MediaPlayerData mpd = mediaPlayers.get(key);
+                                            MediaPlayer mp = mpd.getMediaPlayer();
+                                            if (mp.isPlaying()) {
+                                                if (mp != newPlayer) {
+                                                    //fadeOut(mp);
+                                                    fadeOutMp = mp;
+                                                }
+                                            } else if (mp == newPlayer) {
+                                                try {
+                                                    newPlayer.setDataSource(mediaPlayerData.getUrl());
+                                                    newPlayer.prepareAsync();
+                                                } catch (IOException | IllegalStateException e) {
+                                                    Log.d("TAG", "Error occurred");
+                                                }
+                                            } else
+                                                Log.d("demo", "playing same track");
                                         }
-                                        else
-                                            Log.d("demo","playing same track" );
                                     }
                                     beaconCounter.clear();
                                 } else {
@@ -260,4 +270,9 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnErr
 
     }
 
+    @Override
+    public void onMovement() {
+        this.movementCount++;
+        Log.d("movement","current count ="+movementCount+" previous Count ="+previousCount);
+    }
 }
