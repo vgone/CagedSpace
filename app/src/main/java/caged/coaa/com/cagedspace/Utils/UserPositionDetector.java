@@ -1,4 +1,4 @@
-package caged.coaa.com.cagedspace.Tasks;
+package caged.coaa.com.cagedspace.Utils;
 
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -6,16 +6,13 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.util.Log;
 
+import caged.coaa.com.cagedspace.Interface.MovementListener;
 import caged.coaa.com.cagedspace.MainActivity;
 
 /**
  * Created by SaideepReddy on 12/10/2015.
  */
 public class UserPositionDetector implements SensorEventListener{
-
-    public interface MovementListener{
-        void onMovement();
-    }
 
     SensorManager mSensorManager;
     Sensor mAccelerometer;

@@ -1,4 +1,4 @@
-package caged.coaa.com.cagedspace;
+package caged.coaa.com.cagedspace.Utils;
 
 import org.json.JSONException;
 import org.json.JSONObject;

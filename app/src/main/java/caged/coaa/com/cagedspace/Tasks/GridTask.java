@@ -12,8 +12,8 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 
-import caged.coaa.com.cagedspace.Grid;
-import caged.coaa.com.cagedspace.GridUtil;
+import caged.coaa.com.cagedspace.Utils.Grid;
+import caged.coaa.com.cagedspace.Utils.GridUtil;
 import caged.coaa.com.cagedspace.Interface.GridCallBack;
 import caged.coaa.com.cagedspace.R;
 

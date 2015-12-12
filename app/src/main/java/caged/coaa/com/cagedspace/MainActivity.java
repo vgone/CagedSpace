@@ -1,5 +1,6 @@
 package caged.coaa.com.cagedspace;
 
+import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.hardware.SensorManager;
 import android.media.MediaPlayer;
@@ -26,18 +27,20 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import caged.coaa.com.cagedspace.Interface.GridCallBack;
-import caged.coaa.com.cagedspace.Tasks.GridTask;
-import caged.coaa.com.cagedspace.Tasks.UserPositionDetector;
+import caged.coaa.com.cagedspace.Interface.MovementListener;
+import caged.coaa.com.cagedspace.Utils.Grid;
+import caged.coaa.com.cagedspace.Utils.MediaPlayerData;
+import caged.coaa.com.cagedspace.Utils.UserPositionDetector;
 
 //Comment added
-public class MainActivity extends AppCompatActivity implements MediaPlayer.OnErrorListener, MediaPlayer.OnPreparedListener,UserPositionDetector.MovementListener {
+public class MainActivity extends AppCompatActivity implements MediaPlayer.OnErrorListener, MediaPlayer.OnPreparedListener,MovementListener {
     private Map<Integer, MediaPlayerData> mediaPlayers;
     private List<String> streams;
     TextView tvStreamNo;
     private BeaconManager beaconManager;
     private Region region;
     private Map<String, Integer> PLACES_BY_BEACONS;
-    float volume1, volume2;
+    float volume1,volume2;
     Timer timer1;
     //int tempRegion = 0;
     //int count = 0;
@@ -103,13 +106,17 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnErr
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-
+        Intent intent = null;
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
+        if (id == R.id.action_map) {
+            intent = new Intent(MainActivity.this,MapActivity.class);
+        } else if(id == R.id.action_orchestra){
+            intent = new Intent(MainActivity.this,OrchestraActvity.class);
+        } else if (id== R.id.action_about){
+            intent = new Intent(MainActivity.this,AboutActivity.class);
         }
-
-        return super.onOptionsItemSelected(item);
+        if(intent!=null) startActivity(intent);
+        return true;
     }
 
     @Override
@@ -223,7 +230,7 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnErr
                             if (beaconCounter.containsKey(regionNo)) {
                                 int count = beaconCounter.get(regionNo);
                                 if (count == 3) {
-                                    if(previousCount + 7 <movementCount) {
+                                    if(movementCount>previousCount+7) {
 
                                         previousCount = movementCount;
                                         Log.d("demo", "playing the stream " + regionNo);

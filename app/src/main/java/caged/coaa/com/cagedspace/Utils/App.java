@@ -1,4 +1,4 @@
-package caged.coaa.com.cagedspace;
+package caged.coaa.com.cagedspace.Utils;
 
 import android.app.Application;
 
@@ -16,8 +16,8 @@ public class App extends Application {
     public void onCreate() {
         super.onCreate();
         beaconManager = new BeaconManager(getApplicationContext());
-       Parse.initialize(this, "T0zNIvsroRy6LRyCO3mT90txR5ADqz6nprz2rcs1", "EuNsGGr1rFccqfUeKOH7yX5lIsudzuSreL9PVmAb");
-        Parse.enableLocalDatastore(this);
+       Parse.initialize(this, "FkOrKacTGHOegnsonl7DeF6oBzRJzZWdjw0xafmv", "e6pzZ3UQFskVDyFkEw07sSCmd1Jgvdc427PDIpF6");
+        //Parse.enableLocalDatastore(this);
     }
 
 }
