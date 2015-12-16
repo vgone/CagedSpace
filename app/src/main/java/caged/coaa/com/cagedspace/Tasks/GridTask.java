@@ -40,6 +40,7 @@ public class GridTask extends AsyncTask<String, Void, ArrayList<Grid>> {
         super.onPreExecute();
         pd = new ProgressDialog(mContext);
         pd.setMessage(mContext.getResources().getString(R.string.dpDownload));
+        pd.setCancelable(false);
         pd.show();
     }
 

@@ -6,6 +6,7 @@ import android.os.AsyncTask;
 
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -13,17 +14,23 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
+
+import caged.coaa.com.cagedspace.Interface.OrchestraInfoCallBack;
+import caged.coaa.com.cagedspace.Utils.Performer;
 
 /**
  * Created by SaideepReddy on 12/11/2015.
  */
-public class getOrchestraInfo extends AsyncTask<String,Void,JSONArray> {
+public class getOrchestraInfo extends AsyncTask<String,Void,ArrayList<Performer>> {
 
     ProgressDialog pd;
     Context mContext;
+    private OrchestraInfoCallBack callBack;
 
-    public getOrchestraInfo(Context context) {
+    public getOrchestraInfo(Context context,OrchestraInfoCallBack callBack) {
         this.mContext = context;
+        this.callBack = callBack;
     }
 
     @Override
@@ -35,15 +42,17 @@ public class getOrchestraInfo extends AsyncTask<String,Void,JSONArray> {
     }
 
     @Override
-    protected void onPostExecute(JSONArray performers) {
+    protected void onPostExecute(ArrayList<Performer> performers) {
         super.onPostExecute(performers);
         pd.dismiss();
+        callBack.getPerformersList(performers);
     }
 
     @Override
-    protected JSONArray doInBackground(String[] params) {
+    protected ArrayList<Performer> doInBackground(String[] params) {
         HttpURLConnection connection;
-        JSONArray performers = null;
+
+        ArrayList<Performer> performers = new ArrayList<>();
         try {
             connection = (HttpURLConnection) new URL(params[0]).openConnection();
             BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
@@ -53,7 +62,20 @@ public class getOrchestraInfo extends AsyncTask<String,Void,JSONArray> {
                 sb.append(line);
                 line = reader.readLine();
             }
-            performers = new JSONArray(sb.toString());
+            //Log.d("etOrche",sb.toString());
+            JSONArray performersJSONArray = new JSONArray(sb.toString());
+
+            for(int i=0;i<performersJSONArray.length();i++){
+                JSONObject object = performersJSONArray.getJSONObject(i);
+                Performer performer = new Performer();
+                performer.setName(object.getString("playerName"));
+                performer.setCaption(object.getString("playerCaption"));
+                performer.setImage(object.getString("playerPhoto"));
+                performers.add(performer);
+            }
+
+           // Log.d("getorch",performers.toString());
+            return performers;
         } catch (MalformedURLException e) {
             e.printStackTrace();
         } catch (IOException e) {

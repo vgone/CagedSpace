@@ -8,14 +8,11 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
-import java.util.concurrent.ExecutionException;
 
 import caged.coaa.com.cagedspace.R;
-import caged.coaa.com.cagedspace.Tasks.getImage;
 
 /**
  * Created by SaideepReddy on 12/11/2015.
@@ -48,7 +45,8 @@ public class PerformersAdapter extends ArrayAdapter<Performer> {
 
             tv1.setText(performer.getName());
             tv2.setText("\t\t\t\""+performer.getCaption()+"\"");
-            iv.setImageBitmap(performer.getImage());
+        Picasso.with(mContext)
+                .load(performer.getImage()).into(iv);
 
         return convertView;
     }

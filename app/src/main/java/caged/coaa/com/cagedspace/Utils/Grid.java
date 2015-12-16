@@ -11,12 +11,22 @@ public class Grid {
     private int id;
     private String beaconId;
     private String streamURL;
+    private String gridImageURL;
+
+    public String getGridImageURL() {
+        return gridImageURL;
+    }
+
+    public void setGridImageURL(String gridImageURL) {
+        this.gridImageURL = gridImageURL;
+    }
 
     static Grid createGrid(JSONObject gridJSONObject) throws JSONException {
       Grid gridTemplate = new Grid();
         gridTemplate.setId(gridJSONObject.getInt("id"));
         gridTemplate.setBeaconId(gridJSONObject.getString("beaconId"));
         gridTemplate.setStreamURL(gridJSONObject.getString("streamURL"));
+        gridTemplate.setGridImageURL(gridJSONObject.getString("gridImageURL"));
         return  gridTemplate;
 
     }
@@ -27,6 +37,7 @@ public class Grid {
                 "id=" + id +
                 ", beaconId='" + beaconId + '\'' +
                 ", streamURL='" + streamURL + '\'' +
+                ", gridImageURL='" + gridImageURL + '\'' +
                 '}';
     }
 

@@ -1,14 +1,12 @@
 package caged.coaa.com.cagedspace.Utils;
 
-import android.graphics.Bitmap;
-
 /**
  * Created by SaideepReddy on 12/11/2015.
  */
 public class Performer {
     private String name;
     private String caption;
-    private Bitmap image;
+    private String image;
 
     public String getName() {
         return name;
@@ -26,11 +24,20 @@ public class Performer {
         this.caption = caption;
     }
 
-    public Bitmap getImage() {
+    public String getImage() {
         return image;
     }
 
-    public void setImage(Bitmap image) {
+    public void setImage(String image) {
         this.image = image;
+    }
+
+    @Override
+    public String toString() {
+        return "Performer{" +
+                "name='" + name + '\'' +
+                ", caption='" + caption + '\'' +
+                ", image='" + image + '\'' +
+                '}';
     }
 }

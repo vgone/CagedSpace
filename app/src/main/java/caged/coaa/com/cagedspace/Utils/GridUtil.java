@@ -25,11 +25,12 @@ public class GridUtil {
         StringBuilder sb = new StringBuilder();
 
         String line = reader.readLine();
+        Log.d("GridUtil",line.toString());
         while (line != null) {
             sb.append(line);
             line = reader.readLine();
         }
-        Log.d("demo", sb.toString());
+        //Log.d("GridUtil", sb.toString());
         JSONArray jsonGridArray = new JSONArray(sb.toString());
         for (int i = 0; i < jsonGridArray.length(); i++) {
             JSONObject gridJSONObject = jsonGridArray.getJSONObject(i);
