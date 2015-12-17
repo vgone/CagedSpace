@@ -89,9 +89,17 @@ public class SplashScreenActivity extends AppCompatActivity {
     }
 
     private void startMain() {
-        Intent intent = new Intent(SplashScreenActivity.this,MainActivity.class);
-        startActivity(intent);
-        finish();
+        AlertDialog.Builder builder = new AlertDialog.Builder(SplashScreenActivity.this);
+        builder.setCancelable(false)
+                .setMessage("For best experience keep the handset in your pocket")
+                .setPositiveButton("Okay", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        Intent intent = new Intent(SplashScreenActivity.this,MainActivity.class);
+                        startActivity(intent);
+                        finish();
+                    }
+                }).create().show();
     }
 
     private void showAlert(AlertDialog.Builder builder) {

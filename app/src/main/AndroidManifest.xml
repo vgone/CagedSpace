@@ -19,6 +19,7 @@
         android:required="false" />
 
     <application
+        android:screenOrientation="landscape"
         android:name=".Utils.App"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
